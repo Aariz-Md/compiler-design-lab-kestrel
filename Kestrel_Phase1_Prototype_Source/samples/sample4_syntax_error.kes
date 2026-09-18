@@ -1,0 +1,5 @@
+// Sample 4: deliberate syntax error (missing closing parenthesis)
+x = 5;
+if (x < 10 {
+    print(x);
+}

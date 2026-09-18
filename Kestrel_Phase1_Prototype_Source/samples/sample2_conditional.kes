@@ -1,0 +1,8 @@
+// Sample 2: conditional logic
+x = 5;
+y = 10;
+if (x < y && y != 0) {
+    print(x + y);
+} else {
+    print(x - y);
+}
