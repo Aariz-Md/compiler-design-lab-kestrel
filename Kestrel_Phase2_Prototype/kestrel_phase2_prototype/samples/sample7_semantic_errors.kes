@@ -1,0 +1,9 @@
+return 5;
+
+function add(a, b) {
+    return a + b;
+}
+
+total = add(1, 2, 3);
+print(total);
+print(undeclaredVariable);

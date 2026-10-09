@@ -1,0 +1,349 @@
+############ RUN: samples/sample5_functions_recursion.kes ############
+==============================================================================
+KESTREL PIPELINE  --  sample5_functions_recursion.kes
+==============================================================================
+
+SOURCE:
+------------------------------------------------------------------------------
+function fact(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * fact(n - 1);
+}
+
+function fib(n) {
+    if (n < 2) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+x = fact(5);
+y = fib(7);
+print(x);
+print(y);
+
+PARSE TREE:
+------------------------------------------------------------------------------
+Program
+  Function (fact) params=(n)
+    body:
+      If
+        condition:
+          Binary (<=)
+            Variable (n)
+            Literal (1.0)
+        then:
+          Block
+            Return
+              Literal (1.0)
+      Return
+        Binary (*)
+          Variable (n)
+          Call
+            callee:
+              Variable (fact)
+            args:
+              Binary (-)
+                Variable (n)
+                Literal (1.0)
+  Function (fib) params=(n)
+    body:
+      If
+        condition:
+          Binary (<)
+            Variable (n)
+            Literal (2.0)
+        then:
+          Block
+            Return
+              Variable (n)
+      Return
+        Binary (+)
+          Call
+            callee:
+              Variable (fib)
+            args:
+              Binary (-)
+                Variable (n)
+                Literal (1.0)
+          Call
+            callee:
+              Variable (fib)
+            args:
+              Binary (-)
+                Variable (n)
+                Literal (2.0)
+  ExpressionStmt
+    Assign (x)
+      Call
+        callee:
+          Variable (fact)
+        args:
+          Literal (5.0)
+
+  ExpressionStmt
+    Assign (y)
+      Call
+        callee:
+          Variable (fib)
+        args:
+          Literal (7.0)
+
+  PrintStmt
+    Variable (x)
+
+  PrintStmt
+    Variable (y)
+
+SYMBOL TABLE:
+------------------------------------------------------------------------------
+Scope[GLOBAL] label=global parent=-
+    fact         FUNCTION(arity=1)
+    fib          FUNCTION(arity=1)
+    x            UNKNOWN
+    y            UNKNOWN
+Scope[FUNCTION] label=fact parent=global
+    n            UNKNOWN
+Scope[BLOCK] label=block#1 parent=fact
+    (empty)
+Scope[FUNCTION] label=fib parent=global
+    n            UNKNOWN
+Scope[BLOCK] label=block#2 parent=fib
+    (empty)
+
+BYTECODE (IR):
+------------------------------------------------------------------------------
+Chunk 'fact':
+     0  LOAD_LOCAL     0
+     1  CONST          1.0
+     2  LE
+     3  JUMP_IF_FALSE  6
+     4  CONST          1.0
+     5  RETURN
+     6  LOAD_LOCAL     0
+     7  LOAD_LOCAL     0
+     8  CONST          1.0
+     9  SUB
+    10  CALL           fact, 1
+    11  MUL
+    12  RETURN
+
+Chunk 'fib':
+     0  LOAD_LOCAL     0
+     1  CONST          2.0
+     2  LT
+     3  JUMP_IF_FALSE  6
+     4  LOAD_LOCAL     0
+     5  RETURN
+     6  LOAD_LOCAL     0
+     7  CONST          1.0
+     8  SUB
+     9  CALL           fib, 1
+    10  LOAD_LOCAL     0
+    11  CONST          2.0
+    12  SUB
+    13  CALL           fib, 1
+    14  ADD
+    15  RETURN
+
+Chunk 'main':
+     0  CONST          5.0
+     1  CALL           fact, 1
+     2  STORE_GLOBAL   "x"
+     3  LOAD_GLOBAL    "x"
+     4  POP
+     5  CONST          7.0
+     6  CALL           fib, 1
+     7  STORE_GLOBAL   "y"
+     8  LOAD_GLOBAL    "y"
+     9  POP
+    10  LOAD_GLOBAL    "x"
+    11  PRINT
+    12  LOAD_GLOBAL    "y"
+    13  PRINT
+
+(No semantic errors. Execution by the Virtual Machine is implemented in Phase 3.)
+
+############ RUN: samples/sample6_scope_and_shadowing.kes ############
+==============================================================================
+KESTREL PIPELINE  --  sample6_scope_and_shadowing.kes
+==============================================================================
+
+SOURCE:
+------------------------------------------------------------------------------
+x = 100;
+
+function useLocalX(n) {
+    x = n * 2;
+    if (x > 0) {
+        x = x + 1;
+        print(x);
+    }
+    return x;
+}
+
+result = useLocalX(10);
+print(x);
+print(result);
+
+PARSE TREE:
+------------------------------------------------------------------------------
+Program
+  ExpressionStmt
+    Assign (x)
+      Literal (100.0)
+
+  Function (useLocalX) params=(n)
+    body:
+      ExpressionStmt
+        Assign (x)
+          Binary (*)
+            Variable (n)
+            Literal (2.0)
+
+      If
+        condition:
+          Binary (>)
+            Variable (x)
+            Literal (0.0)
+        then:
+          Block
+            ExpressionStmt
+              Assign (x)
+                Binary (+)
+                  Variable (x)
+                  Literal (1.0)
+
+            PrintStmt
+              Variable (x)
+      Return
+        Variable (x)
+  ExpressionStmt
+    Assign (result)
+      Call
+        callee:
+          Variable (useLocalX)
+        args:
+          Literal (10.0)
+
+  PrintStmt
+    Variable (x)
+
+  PrintStmt
+    Variable (result)
+
+SYMBOL TABLE:
+------------------------------------------------------------------------------
+Scope[GLOBAL] label=global parent=-
+    x            NUMBER
+    useLocalX    FUNCTION(arity=1)
+    result       UNKNOWN
+Scope[FUNCTION] label=useLocalX parent=global
+    n            UNKNOWN
+Scope[BLOCK] label=block#1 parent=useLocalX
+    (empty)
+
+BYTECODE (IR):
+------------------------------------------------------------------------------
+Chunk 'useLocalX':
+     0  LOAD_LOCAL     0
+     1  CONST          2.0
+     2  MUL
+     3  STORE_LOCAL    1
+     4  LOAD_LOCAL     1
+     5  POP
+     6  LOAD_LOCAL     1
+     7  CONST          0.0
+     8  GT
+     9  JUMP_IF_FALSE  18
+    10  LOAD_LOCAL     1
+    11  CONST          1.0
+    12  ADD
+    13  STORE_LOCAL    1
+    14  LOAD_LOCAL     1
+    15  POP
+    16  LOAD_LOCAL     1
+    17  PRINT
+    18  LOAD_LOCAL     1
+    19  RETURN
+
+Chunk 'main':
+     0  CONST          100.0
+     1  STORE_GLOBAL   "x"
+     2  LOAD_GLOBAL    "x"
+     3  POP
+     4  CONST          10.0
+     5  CALL           useLocalX, 1
+     6  STORE_GLOBAL   "result"
+     7  LOAD_GLOBAL    "result"
+     8  POP
+     9  LOAD_GLOBAL    "x"
+    10  PRINT
+    11  LOAD_GLOBAL    "result"
+    12  PRINT
+
+(No semantic errors. Execution by the Virtual Machine is implemented in Phase 3.)
+
+############ RUN: samples/sample7_semantic_errors.kes ############
+==============================================================================
+KESTREL PIPELINE  --  sample7_semantic_errors.kes
+==============================================================================
+
+SOURCE:
+------------------------------------------------------------------------------
+return 5;
+
+function add(a, b) {
+    return a + b;
+}
+
+total = add(1, 2, 3);
+print(total);
+print(undeclaredVariable);
+
+PARSE TREE:
+------------------------------------------------------------------------------
+Program
+  Return
+    Literal (5.0)
+  Function (add) params=(a, b)
+    body:
+      Return
+        Binary (+)
+          Variable (a)
+          Variable (b)
+  ExpressionStmt
+    Assign (total)
+      Call
+        callee:
+          Variable (add)
+        args:
+          Literal (1.0)
+          Literal (2.0)
+          Literal (3.0)
+
+  PrintStmt
+    Variable (total)
+
+  PrintStmt
+    Variable (undeclaredVariable)
+
+SYMBOL TABLE:
+------------------------------------------------------------------------------
+Scope[GLOBAL] label=global parent=-
+    add          FUNCTION(arity=2)
+    total        UNKNOWN
+Scope[FUNCTION] label=add parent=global
+    a            UNKNOWN
+    b            UNKNOWN
+
+SEMANTIC ERRORS:
+------------------------------------------------------------------------------
+[line 1] Semantic Error: 'return' used outside of a function
+[line 7] Semantic Error: function 'add' expects 2 argument(s) but got 3
+[line 9] Semantic Error: undeclared variable 'undeclaredVariable'
+
+(Bytecode generation skipped: fix the semantic errors above first.)
+

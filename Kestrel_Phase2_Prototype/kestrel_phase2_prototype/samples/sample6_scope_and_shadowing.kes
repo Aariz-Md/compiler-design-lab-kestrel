@@ -1,0 +1,14 @@
+x = 100;
+
+function useLocalX(n) {
+    x = n * 2;
+    if (x > 0) {
+        x = x + 1;
+        print(x);
+    }
+    return x;
+}
+
+result = useLocalX(10);
+print(x);
+print(result);
