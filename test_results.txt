@@ -1,0 +1,23 @@
+PASS  arithmetic_precedence
+PASS  call_in_loop
+PASS  err_arity
+PASS  err_division_by_zero
+PASS  err_stack_overflow
+PASS  err_syntax
+PASS  err_type_mismatch_runtime
+PASS  err_undeclared
+PASS  factorial
+PASS  fibonacci
+PASS  function_args_order
+PASS  if_else_nested
+PASS  logic_shortcircuit
+PASS  no_return_function
+PASS  opt_constant_fold
+PASS  opt_dead_branch
+PASS  opt_loop_with_jumps
+PASS  shadowing
+PASS  strings
+PASS  unary_and_comparison
+PASS  while_sum
+
+21/21 tests passed
